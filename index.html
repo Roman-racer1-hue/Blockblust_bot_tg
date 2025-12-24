@@ -3,16 +3,209 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Block Blast 🎮</title>
-    <!-- Путь к вашим стилям -->
-    <link rel="stylesheet" href="static/css/game.css">
+    <title>Block Blust 🎮</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
 </head>
 <body>
-    <h1>Block Blast Game</h1>
-    <p>Ваша игра скоро здесь появится! 🚀</p>
-    <div id="game-container"></div>
-
-    <!-- Путь к вашему скрипту -->
-    <script src="static/js/game.js"></script>
+    <div class="container">
+        <!-- Игровое поле -->
+        <div class="game-board">
+            <div class="game-header">
+                <div class="score-display">
+                    <span class="score-label">Очки:</span>
+                    <span id="score" class="score-value">0</span>
+                </div>
+                <div class="combo-display">
+                    <span class="combo-label">Комбо:</span>
+                    <span id="combo" class="combo-value">x1</span>
+                </div>
+                <div class="level-display">
+                    <span class="level-label">Уровень:</span>
+                    <span id="level" class="level-value">1</span>
+                </div>
+            </div>
+            
+            <!-- Сетка 8x8 -->
+            <div class="grid-container">
+                <div id="game-grid" class="grid"></div>
+            </div>
+            
+            <!-- Панель доступных фигур -->
+            <div class="shapes-panel">
+                <h3>Доступные фигуры:</h3>
+                <div class="shapes-container">
+                    <div class="shape-slot" id="shape-0" data-index="0">
+                        <div class="shape-preview"></div>
+                        <div class="shape-label">Фигура 1</div>
+                    </div>
+                    <div class="shape-slot" id="shape-1" data-index="1">
+                        <div class="shape-preview"></div>
+                        <div class="shape-label">Фигура 2</div>
+                    </div>
+                    <div class="shape-slot" id="shape-2" data-index="2">
+                        <div class="shape-preview"></div>
+                        <div class="shape-label">Фигура 3</div>
+                    </div>
+                </div>
+                <div class="controls">
+                    <button id="new-game-btn" class="btn btn-primary">
+                        <i class="fas fa-play"></i> Новая игра
+                    </button>
+                    <button id="hint-btn" class="btn btn-secondary">
+                        <i class="fas fa-lightbulb"></i> Подсказка
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Меню игры -->
+        <div id="game-menu" class="game-menu active">
+            <div class="menu-content">
+                <h1 class="game-title">🎮 Block Blust</h1>
+                <p class="game-subtitle">Стратегическая головоломка</p>
+                
+                <div class="menu-buttons">
+                    <button id="start-game-btn" class="menu-btn btn-primary">
+                        <i class="fas fa-play-circle"></i> Начать игру
+                    </button>
+                    <button id="continue-btn" class="menu-btn btn-secondary" style="display: none;">
+                        <i class="fas fa-redo"></i> Продолжить
+                    </button>
+                    <button id="stats-btn" class="menu-btn btn-info">
+                        <i class="fas fa-chart-bar"></i> Статистика
+                    </button>
+                    <button id="leaderboard-btn" class="menu-btn btn-warning">
+                        <i class="fas fa-trophy"></i> Топ игроков
+                    </button>
+                    <button id="achievements-btn" class="menu-btn btn-success">
+                        <i class="fas fa-medal"></i> Достижения
+                    </button>
+                    <button id="help-btn" class="menu-btn btn-light">
+                        <i class="fas fa-question-circle"></i> Помощь
+                    </button>
+                </div>
+                
+                <div class="quick-stats">
+                    <div class="stat-item">
+                        <span class="stat-label">Лучший счет:</span>
+                        <span id="best-score" class="stat-value">0</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Сыграно игр:</span>
+                        <span id="total-games" class="stat-value">0</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Окно Game Over -->
+        <div id="game-over" class="game-over">
+            <div class="game-over-content">
+                <h2><i class="fas fa-gamepad"></i> Игра окончена!</h2>
+                <div class="result-stats">
+                    <div class="result-item">
+                        <span>Набрано очков:</span>
+                        <span id="final-score" class="highlight">0</span>
+                    </div>
+                    <div class="result-item">
+                        <span>Очищено линий:</span>
+                        <span id="final-lines" class="highlight">0</span>
+                    </div>
+                    <div class="result-item">
+                        <span>Макс. комбо:</span>
+                        <span id="final-combo" class="highlight">x1</span>
+                    </div>
+                    <div class="result-item" id="new-record" style="display: none;">
+                        <span class="record-badge">🏆 НОВЫЙ РЕКОРД!</span>
+                    </div>
+                </div>
+                <div class="game-over-buttons">
+                    <button id="play-again-btn" class="btn btn-primary">
+                        <i class="fas fa-redo"></i> Играть снова
+                    </button>
+                    <button id="back-to-menu-btn" class="btn btn-secondary">
+                        <i class="fas fa-home"></i> В меню
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Статистика -->
+        <div id="stats-modal" class="modal">
+            <div class="modal-content">
+                <span class="close-modal">&times;</span>
+                <h2><i class="fas fa-chart-bar"></i> Статистика</h2>
+                <div id="stats-content"></div>
+            </div>
+        </div>
+        
+        <!-- Топ игроков -->
+        <div id="leaderboard-modal" class="modal">
+            <div class="modal-content">
+                <span class="close-modal">&times;</span>
+                <h2><i class="fas fa-trophy"></i> Топ игроков</h2>
+                <div class="leaderboard-tabs">
+                    <button class="tab-btn active" data-period="all">За все время</button>
+                    <button class="tab-btn" data-period="week">За неделю</button>
+                    <button class="tab-btn" data-period="month">За месяц</button>
+                </div>
+                <div id="leaderboard-content"></div>
+            </div>
+        </div>
+        
+        <!-- Достижения -->
+        <div id="achievements-modal" class="modal">
+            <div class="modal-content">
+                <span class="close-modal">&times;</span>
+                <h2><i class="fas fa-medal"></i> Достижения</h2>
+                <div id="achievements-content"></div>
+            </div>
+        </div>
+        
+        <!-- Помощь -->
+        <div id="help-modal" class="modal">
+            <div class="modal-content">
+                <span class="close-modal">&times;</span>
+                <h2><i class="fas fa-question-circle"></i> Правила игры</h2>
+                <div class="help-content">
+                    <h3>🎯 Цель игры</h3>
+                    <p>Набирать очки, размещая фигуры и очищая линии на поле 8×8.</p>
+                    
+                    <h3>🧩 Как играть</h3>
+                    <ol>
+                        <li>Вы получаете 3 фигуры за ход</li>
+                        <li>Выберите фигуру и разместите её на поле</li>
+                        <li>Фигуры НЕЛЬЗЯ поворачивать или отражать</li>
+                        <li>Разместите все 3 фигуры чтобы получить новые</li>
+                    </ol>
+                    
+                    <h3>✨ Очистка линий</h3>
+                    <ul>
+                        <li>Полные горизонтали (8 клеток) очищаются</li>
+                        <li>Полные вертикали (8 клеток) очищаются</li>
+                        <li>Очистка происходит мгновенно</li>
+                        <li>НЕТ гравитации - блоки не падают</li>
+                    </ul>
+                    
+                    <h3>⭐ Система очков</h3>
+                    <ul>
+                        <li>+10 очков за каждый блок</li>
+                        <li>+100 очков за каждую линию</li>
+                        <li>Комбо множитель за последовательные очистки</li>
+                    </ul>
+                    
+                    <h3>💀 Поражение</h3>
+                    <p>Игра заканчивается, когда невозможно разместить хотя бы одну из 3 фигур.</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Уведомления -->
+        <div id="notification" class="notification"></div>
+    </div>
+    
+    <script src="/static/js/game.js"></script>
 </body>
 </html>
